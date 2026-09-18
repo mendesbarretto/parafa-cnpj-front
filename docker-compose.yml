@@ -1,0 +1,21 @@
+services:
+  frontend:
+    container_name: cnpj-parafa-frontend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${IMAGE_NAME:-cnpj-parafa-frontend}:${IMAGE_TAG:-latest}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "${HOST_PORT:-3001}:3000"
+    environment:
+      NODE_ENV: production
+      API_URL: ${API_URL:-http://host.docker.internal:8000/api}
+      NODE_OPTIONS: --max-old-space-size=128
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', response => process.exit(response.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
