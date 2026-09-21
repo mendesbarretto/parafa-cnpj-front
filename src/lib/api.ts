@@ -50,20 +50,15 @@ type PaginatedResponse<T> = {
 
 const apiUrl = process.env.API_URL ?? "http://localhost:8000/api";
 
-async function getJson<T>(path: string, timeoutMs = 2500, noStore = false): Promise<T | null> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-
+async function getJson<T>(path: string, noStore = false): Promise<T | null> {
   try {
     const response = await fetch(`${apiUrl}${path}`, noStore
-      ? { cache: "no-store", signal: controller.signal }
-      : { next: { revalidate: 300 }, signal: controller.signal });
+      ? { cache: "no-store" }
+      : { next: { revalidate: 300 } });
     if (!response.ok) return null;
     return response.json() as Promise<T>;
   } catch {
     return null;
-  } finally {
-    clearTimeout(timeout);
   }
 }
 
@@ -82,9 +77,9 @@ export async function fetchCnpjCities() {
 
 export async function fetchCnpjCity(citySlug: string, after?: number) {
   const query = after ? `?after=${after}` : "";
-  return getJson<{ city: CnpjCity; data: CnpjCompany[]; meta: { next_after?: number; has_more_pages: boolean } }>(`/cnpj/cities/${encodeURIComponent(citySlug)}${query}`, 5000);
+  return getJson<{ city: CnpjCity; data: CnpjCompany[]; meta: { next_after?: number; has_more_pages: boolean } }>(`/cnpj/cities/${encodeURIComponent(citySlug)}${query}`);
 }
 
 export async function fetchCnpjCompany(cnpj: string) {
-  return getJson<{ data: CnpjCompany; related?: CnpjCompany[] }>(`/cnpj/companies/${encodeURIComponent(cnpj)}`, 10000);
+  return getJson<{ data: CnpjCompany; related?: CnpjCompany[] }>(`/cnpj/companies/${encodeURIComponent(cnpj)}`);
 }

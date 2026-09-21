@@ -41,9 +41,9 @@ export default async function Home() {
 
           <div>
             <p className="text-sm font-semibold uppercase tracking-wider text-primary">Explore por localização</p>
-            <h2 className="mt-1 text-2xl font-bold">Cidades com mais empresas</h2>
+            <h2 className="mt-1 text-2xl font-bold">Cidades para explorar</h2>
             <div className="mt-4 divide-y divide-border rounded-2xl border bg-card px-5 shadow-[var(--shadow-soft)]">
-              {cities.length ? cities.map((city, index) => <a key={city.id} href={`/${city.url ? `${city.url}-${city.state.toLowerCase()}` : `${city.name.toLowerCase()}-${city.state.toLowerCase()}`}`} className="flex items-center justify-between py-4 hover:text-primary"><span><span className="mr-3 text-sm text-muted-foreground">{String(index + 1).padStart(2, "0")}</span>{city.name}/{city.state}</span><span className="text-sm text-muted-foreground">{(city.companies_count ?? 0).toLocaleString("pt-BR")}</span></a>) : <p className="py-8 text-muted-foreground">As cidades aparecerão quando a conexão CNPJ estiver configurada.</p>}
+              {cities.length ? cities.map((city, index) => <a key={city.id} href={`/${city.url ? `${city.url}-${city.state.toLowerCase()}` : `${city.name.toLowerCase()}-${city.state.toLowerCase()}`}`} className="flex items-center py-4 hover:text-primary"><span><span className="mr-3 text-sm text-muted-foreground">{String(index + 1).padStart(2, "0")}</span>{city.name}/{city.state}</span></a>) : <p className="py-8 text-muted-foreground">As cidades aparecerão quando a conexão CNPJ estiver configurada.</p>}
             </div>
           </div>
         </section>
