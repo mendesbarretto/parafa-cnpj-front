@@ -5,7 +5,8 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
-ENV NODE_OPTIONS="--max-old-space-size=384"
+ENV NODE_OPTIONS="--max-old-space-size=256"
+ENV NEXT_PRIVATE_BUILD_WORKER=1
 RUN npm ci --silent --prefer-offline --no-audit --no-fund
 
 COPY . .
@@ -22,6 +23,7 @@ ENV PORT=3000
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_OPTIONS="--max-old-space-size=128"
 ENV UV_THREADPOOL_SIZE=2
+ENV NEXT_PRIVATE_BUILD_WORKER=1
 
 RUN addgroup --system --gid 1001 nodejs \
   && adduser --system --uid 1001 nextjs

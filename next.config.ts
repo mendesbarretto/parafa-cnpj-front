@@ -8,7 +8,8 @@ const nextConfig: NextConfig = {
     removeConsole: process.env.NODE_ENV === "production",
   },
   experimental: {
-    memoryBasedWorkersCount: true,
+    memoryBasedWorkersCount: false,
+    cpus: 1,
     optimizePackageImports: ["lucide-react"],
   },
 };

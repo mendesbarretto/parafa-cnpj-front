@@ -30,9 +30,7 @@ docker save "$IMAGE" | gzip > "$ARCHIVE"
 
 echo "Enviando arquivos para ${SERVER_USER}@${SERVER_IP}:${SERVER_PATH}..."
 ssh "${SERVER_USER}@${SERVER_IP}" "mkdir -p '${SERVER_PATH}'"
-scp "$ARCHIVE" docker-compose.yml setup-apache.sh "${SERVER_USER}@${SERVER_IP}:${SERVER_PATH}/"
-ssh "${SERVER_USER}@${SERVER_IP}" "mkdir -p '${SERVER_PATH}/apache-configs'"
-scp "apache-configs/cnpj.parafa.com.br.conf" "${SERVER_USER}@${SERVER_IP}:${SERVER_PATH}/apache-configs/"
+scp "$ARCHIVE" docker-compose.yml "${SERVER_USER}@${SERVER_IP}:${SERVER_PATH}/"
 
 ssh "${SERVER_USER}@${SERVER_IP}" "SERVER_PATH='${SERVER_PATH}' ARCHIVE='${ARCHIVE}' IMAGE_NAME='${IMAGE_NAME}' IMAGE_TAG='${IMAGE_TAG}' HOST_PORT='${HOST_PORT}' API_URL='${API_URL}' MEMORY_LIMIT='${MEMORY_LIMIT}' MEMORY_RESERVATION='${MEMORY_RESERVATION}' CPU_LIMIT='${CPU_LIMIT}' bash -s" <<'ENDSSH'
 set -euo pipefail
@@ -72,4 +70,3 @@ docker logs --tail 30 cnpj-parafa-frontend || true
 ENDSSH
 
 echo "Deploy concluído: http://${SERVER_IP}:${HOST_PORT}"
-echo "Configure o Apache com: sudo ./setup-apache.sh"

@@ -86,5 +86,5 @@ export async function fetchCnpjCity(citySlug: string, after?: number) {
 }
 
 export async function fetchCnpjCompany(cnpj: string) {
-  return getJson<{ data: CnpjCompany; related?: CnpjCompany[] }>(`/cnpj/companies/${encodeURIComponent(cnpj)}`, 10000, true);
+  return getJson<{ data: CnpjCompany; related?: CnpjCompany[] }>(`/cnpj/companies/${encodeURIComponent(cnpj)}`, 10000);
 }
