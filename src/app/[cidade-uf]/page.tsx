@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CnpjCard } from "@/components/CnpjCard";
 import { CnpjSearchForm } from "@/components/CnpjSearchForm";
+import { AdSlot } from "@/components/AdSlot";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { fetchCnpjCity } from "@/lib/api";
@@ -33,6 +34,8 @@ export default async function CityPage({ params, searchParams }: CityPageProps) 
           <p className="mt-3 text-muted-foreground">Consulte empresas, CNPJ e atividades cadastradas neste município.</p>
           <div className="mt-7"><CnpjSearchForm /></div>
         </header>
+
+        <div className="mt-8"><AdSlot slotId="2668303352" /></div>
 
         <section className="mt-10 max-w-3xl rounded-2xl border bg-card px-5 shadow-[var(--shadow-soft)]">
           {companies.length ? companies.map((company) => <CnpjCard key={company.id} company={company} />) : <p className="py-10 text-muted-foreground">Nenhuma empresa encontrada nesta cidade.</p>}

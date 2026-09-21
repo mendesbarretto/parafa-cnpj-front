@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { CnpjCard } from "@/components/CnpjCard";
+import { AdSlot } from "@/components/AdSlot";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { fetchCnpjCompany } from "@/lib/api";
+import { fetchCnpjCity, fetchCnpjCompany } from "@/lib/api";
 
 type CompanyPageProps = {
   params: Promise<{ "cidade-uf": string; cnpj: string; company: string[] }>;
@@ -38,9 +40,14 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
 
   if (!company) notFound();
 
+  const cityResponse = await fetchCnpjCity(citySlug);
+
   const legalNature = typeof company.legal_nature === "string" ? company.legal_nature : company.legal_nature?.name;
   const activity = company.activity ?? (typeof company.activities === "object" && company.activities !== null ? company.activities as { code?: string; name?: string } : null);
-  const address = [company.street, company.number, company.complement].filter(Boolean).join(", ");
+  const address = [company.street, company.complement].filter(Boolean).join(", ");
+  const relatedCompanies = response?.related?.length
+    ? response.related
+    : cityResponse?.data.filter((item) => item.cnpj !== company.cnpj) ?? [];
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -54,6 +61,8 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
           {company.fantasy && <p className="mt-2 text-lg text-muted-foreground">{company.fantasy}</p>}
           <p className="mt-4 text-base text-muted-foreground">CNPJ: {formatCnpj(company.cnpj)}</p>
         </header>
+
+        <div className="mt-8"><AdSlot slotId="4065145505" /></div>
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[1.4fr_1fr]">
           <section className="rounded-2xl border bg-card p-6 shadow-[var(--shadow-soft)]">
@@ -76,6 +85,14 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
           <h2 className="text-xl font-bold">Atividade principal</h2>
           <p className="mt-4 text-muted-foreground">{activity?.code ? `${activity.code} - ` : ""}{activity?.name ?? "Não informada"}</p>
         </section>
+
+        {relatedCompanies.length > 0 && <section className="mt-8 max-w-3xl">
+          <p className="text-sm font-semibold uppercase tracking-wider text-primary">Na mesma cidade</p>
+          <h2 className="mt-2 text-2xl font-bold">Mais empresas em {company.city}/{company.state}</h2>
+          <div className="mt-4 rounded-2xl border bg-card px-5 shadow-[var(--shadow-soft)]">
+            {relatedCompanies.map((relatedCompany) => <CnpjCard key={relatedCompany.id} company={relatedCompany} />)}
+          </div>
+        </section>}
       </main>
       <SiteFooter />
     </div>

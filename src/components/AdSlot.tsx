@@ -32,7 +32,7 @@ export function AdSlot({
 }: AdSlotProps) {
   const size = FORMAT_SIZES[format];
   const insRef = useRef<HTMLModElement>(null);
-  const clientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID as string | undefined;
+  const clientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID ?? "ca-pub-9322585020374860";
 
   useEffect(() => {
     if (!slotId || !clientId) return;

@@ -1,5 +1,6 @@
 import { CnpjCard } from "@/components/CnpjCard";
 import { CnpjSearchForm } from "@/components/CnpjSearchForm";
+import { AdSlot } from "@/components/AdSlot";
 import { SiteHeader } from "@/components/SiteHeader";
 import { fetchCnpjCompanies } from "@/lib/api";
 
@@ -20,6 +21,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         <p className="text-sm font-semibold uppercase tracking-wider text-primary">Consulta pública</p>
         <h1 className="mt-2 text-4xl font-bold tracking-tight text-foreground">Buscar empresas</h1>
         <div className="mt-7"><CnpjSearchForm /></div>
+        <div className="mt-8"><AdSlot slotId="2668303352" /></div>
         <p className="mt-8 text-sm text-muted-foreground">{search ? `Resultados para “${search}”` : "Digite um CNPJ ou nome para começar"}{meta?.total !== undefined ? ` • ${meta.total.toLocaleString("pt-BR")} encontrados` : ""}</p>
         <section className="mt-3 max-w-3xl rounded-2xl border bg-card px-5 shadow-[var(--shadow-soft)]">
           {companies.length ? companies.map((company) => <CnpjCard key={company.id} company={company} />) : <p className="py-10 text-muted-foreground">Nenhuma empresa encontrada.</p>}

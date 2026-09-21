@@ -5,6 +5,10 @@ services:
       context: .
       dockerfile: Dockerfile
     image: ${IMAGE_NAME:-cnpj-parafa-frontend}:${IMAGE_TAG:-latest}
+    mem_limit: ${MEMORY_LIMIT:-256m}
+    mem_reservation: ${MEMORY_RESERVATION:-128m}
+    cpus: ${CPU_LIMIT:-0.50}
+    pids_limit: 128
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
@@ -13,6 +17,7 @@ services:
       NODE_ENV: production
       API_URL: ${API_URL:-http://host.docker.internal:8000/api}
       NODE_OPTIONS: --max-old-space-size=128
+      UV_THREADPOOL_SIZE: 2
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', response => process.exit(response.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]

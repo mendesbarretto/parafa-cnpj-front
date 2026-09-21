@@ -1,5 +1,6 @@
 import { CnpjCard } from "@/components/CnpjCard";
 import { CnpjSearchForm } from "@/components/CnpjSearchForm";
+import { AdSlot } from "@/components/AdSlot";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { fetchCnpjBestCities, fetchCnpjCompanies } from "@/lib/api";
@@ -23,6 +24,7 @@ export default async function Home() {
             <h1 className="max-w-3xl text-4xl font-bold tracking-tight sm:text-6xl">Encontre empresas de todo o Brasil</h1>
             <p className="mt-5 max-w-xl text-lg text-primary-foreground/75">Consulte dados públicos de empresas, atividades e localização em poucos segundos.</p>
             <div className="mt-8"><CnpjSearchForm /></div>
+            <div className="mt-8"><AdSlot slotId="8686916795" /></div>
           </div>
         </section>
 
@@ -41,7 +43,7 @@ export default async function Home() {
             <p className="text-sm font-semibold uppercase tracking-wider text-primary">Explore por localização</p>
             <h2 className="mt-1 text-2xl font-bold">Cidades com mais empresas</h2>
             <div className="mt-4 divide-y divide-border rounded-2xl border bg-card px-5 shadow-[var(--shadow-soft)]">
-              {cities.length ? cities.map((city, index) => <a key={city.id} href={`/${city.url ?? `${city.name.toLowerCase()}-${city.state.toLowerCase()}`}`} className="flex items-center justify-between py-4 hover:text-primary"><span><span className="mr-3 text-sm text-muted-foreground">{String(index + 1).padStart(2, "0")}</span>{city.name}/{city.state}</span><span className="text-sm text-muted-foreground">{(city.companies_count ?? 0).toLocaleString("pt-BR")}</span></a>) : <p className="py-8 text-muted-foreground">As cidades aparecerão quando a conexão CNPJ estiver configurada.</p>}
+              {cities.length ? cities.map((city, index) => <a key={city.id} href={`/${city.url ? `${city.url}-${city.state.toLowerCase()}` : `${city.name.toLowerCase()}-${city.state.toLowerCase()}`}`} className="flex items-center justify-between py-4 hover:text-primary"><span><span className="mr-3 text-sm text-muted-foreground">{String(index + 1).padStart(2, "0")}</span>{city.name}/{city.state}</span><span className="text-sm text-muted-foreground">{(city.companies_count ?? 0).toLocaleString("pt-BR")}</span></a>) : <p className="py-8 text-muted-foreground">As cidades aparecerão quando a conexão CNPJ estiver configurada.</p>}
             </div>
           </div>
         </section>
