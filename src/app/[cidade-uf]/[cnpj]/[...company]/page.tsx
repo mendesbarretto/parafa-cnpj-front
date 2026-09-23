@@ -40,14 +40,17 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
 
   if (!company) notFound();
 
-  const cityResponse = await fetchCnpjCity(citySlug);
+  let relatedCompanies = Array.isArray(response?.related) ? response.related : [];
+  if (relatedCompanies.length === 0) {
+    const cityResponse = await fetchCnpjCity(citySlug);
+    relatedCompanies = Array.isArray(cityResponse?.data)
+      ? cityResponse.data.filter((item) => item.cnpj !== company.cnpj)
+      : [];
+  }
 
   const legalNature = typeof company.legal_nature === "string" ? company.legal_nature : company.legal_nature?.name;
   const activity = company.activity ?? (typeof company.activities === "object" && company.activities !== null ? company.activities as { code?: string; name?: string } : null);
   const address = [company.street, company.complement].filter(Boolean).join(", ");
-  const relatedCompanies = response?.related?.length
-    ? response.related
-    : cityResponse?.data.filter((item) => item.cnpj !== company.cnpj) ?? [];
 
   return (
     <div className="min-h-screen bg-background text-foreground">

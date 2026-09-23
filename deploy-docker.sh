@@ -10,7 +10,8 @@ SERVER_PATH="${SERVER_PATH:-/home/cnpj-parafa-front}"
 IMAGE_NAME="${IMAGE_NAME:-cnpj-parafa-frontend}"
 IMAGE_TAG="${IMAGE_TAG:-latest}"
 HOST_PORT="${HOST_PORT:-3001}"
-API_URL="${API_URL:-https://api.parafa.com.br/api}"
+API_URL="${API_URL:-http://cnpj-api/api}"
+INTERNAL_NETWORK="${INTERNAL_NETWORK:-cnpj-internal}"
 MEMORY_LIMIT="${MEMORY_LIMIT:-256m}"
 MEMORY_RESERVATION="${MEMORY_RESERVATION:-128m}"
 CPU_LIMIT="${CPU_LIMIT:-0.50}"
@@ -32,11 +33,12 @@ echo "Enviando arquivos para ${SERVER_USER}@${SERVER_IP}:${SERVER_PATH}..."
 ssh "${SERVER_USER}@${SERVER_IP}" "mkdir -p '${SERVER_PATH}'"
 scp "$ARCHIVE" docker-compose.yml "${SERVER_USER}@${SERVER_IP}:${SERVER_PATH}/"
 
-ssh "${SERVER_USER}@${SERVER_IP}" "SERVER_PATH='${SERVER_PATH}' ARCHIVE='${ARCHIVE}' IMAGE_NAME='${IMAGE_NAME}' IMAGE_TAG='${IMAGE_TAG}' HOST_PORT='${HOST_PORT}' API_URL='${API_URL}' MEMORY_LIMIT='${MEMORY_LIMIT}' MEMORY_RESERVATION='${MEMORY_RESERVATION}' CPU_LIMIT='${CPU_LIMIT}' bash -s" <<'ENDSSH'
+ssh "${SERVER_USER}@${SERVER_IP}" "SERVER_PATH='${SERVER_PATH}' ARCHIVE='${ARCHIVE}' IMAGE_NAME='${IMAGE_NAME}' IMAGE_TAG='${IMAGE_TAG}' HOST_PORT='${HOST_PORT}' API_URL='${API_URL}' INTERNAL_NETWORK='${INTERNAL_NETWORK}' MEMORY_LIMIT='${MEMORY_LIMIT}' MEMORY_RESERVATION='${MEMORY_RESERVATION}' CPU_LIMIT='${CPU_LIMIT}' bash -s" <<'ENDSSH'
 set -euo pipefail
 cd "$SERVER_PATH"
 
 docker load < "$ARCHIVE"
+docker network inspect "$INTERNAL_NETWORK" >/dev/null 2>&1 || docker network create "$INTERNAL_NETWORK"
 
 if docker compose version >/dev/null 2>&1; then
   COMPOSE="docker compose"
@@ -47,7 +49,7 @@ fi
 $COMPOSE down --remove-orphans || true
 docker rm -f cnpj-parafa-frontend 2>/dev/null || true
 
-HOST_PORT="$HOST_PORT" API_URL="$API_URL" IMAGE_NAME="$IMAGE_NAME" IMAGE_TAG="$IMAGE_TAG" \
+HOST_PORT="$HOST_PORT" API_URL="$API_URL" INTERNAL_NETWORK="$INTERNAL_NETWORK" IMAGE_NAME="$IMAGE_NAME" IMAGE_TAG="$IMAGE_TAG" \
 MEMORY_LIMIT="$MEMORY_LIMIT" MEMORY_RESERVATION="$MEMORY_RESERVATION" CPU_LIMIT="$CPU_LIMIT" \
   $COMPOSE up -d --no-build frontend
 rm -f "$ARCHIVE"
@@ -64,6 +66,12 @@ for attempt in $(seq 1 15); do
   fi
   sleep 2
 done
+
+if ! docker exec cnpj-parafa-frontend node -e 'fetch(process.env.API_URL + "/cnpj/best-cities").then(response => { console.log("API CNPJ:", response.status); process.exit(response.ok ? 0 : 1); }).catch(error => { console.error(error); process.exit(1); })'; then
+  echo "Frontend não conseguiu acessar a API CNPJ pela rede Docker"
+  docker logs --tail 50 cnpj-parafa-frontend || true
+  exit 1
+fi
 
 docker ps --filter name=cnpj-parafa-frontend
 docker logs --tail 30 cnpj-parafa-frontend || true
