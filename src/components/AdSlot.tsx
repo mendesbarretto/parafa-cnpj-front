@@ -21,8 +21,7 @@ interface AdSlotProps {
 
 /**
  * Espaço reservado para anúncios do Google (AdSense).
- * A área é sempre reservada com a altura final do bloco para evitar
- * deslocamento de layout (CLS) quando o anúncio carregar.
+ * Reserva espaço mínimo sem recortar o criativo responsivo.
  */
 export function AdSlot({
   slotId,
@@ -35,13 +34,20 @@ export function AdSlot({
   const clientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID ?? "ca-pub-9322585020374860";
 
   useEffect(() => {
-    if (!slotId || !clientId) return;
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
-    } catch {
-      /* anúncio indisponível */
-    }
+    const element = insRef.current;
+    if (!slotId || !clientId || !element) return;
+    const initialize = () => {
+      if (element.dataset.initialized || element.getBoundingClientRect().width <= 0) return;
+      element.dataset.initialized = "true";
+      try {
+        const adsWindow = window as Window & { adsbygoogle?: object[] };
+        (adsWindow.adsbygoogle = adsWindow.adsbygoogle || []).push({});
+      } catch { /* An unavailable ad does not block the page. */ }
+    };
+    const observer = new ResizeObserver(initialize);
+    observer.observe(element);
+    initialize();
+    return () => observer.disconnect();
   }, [slotId, clientId]);
 
   return (
@@ -53,14 +59,14 @@ export function AdSlot({
         {label}
       </span>
       <div
-        className="flex w-full max-w-full items-center justify-center overflow-hidden rounded-xl border border-dashed border-border bg-secondary/40"
+        className="w-full max-w-full"
         style={{ maxWidth: size.width, minHeight: size.height }}
       >
         {slotId && clientId ? (
           <ins
             ref={insRef}
             className="adsbygoogle block"
-            style={{ display: "block", width: "100%", height: size.height }}
+            style={{ display: "block", width: "100%", minHeight: size.height }}
             data-ad-client={clientId}
             data-ad-slot={slotId}
             data-ad-format="auto"

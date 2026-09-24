@@ -25,14 +25,14 @@ export function SiteHeader() {
             Cidades
           </Link>
           <Link
-            href="/contato"
+            href="https://parafa.com.br/contato"
             className="transition-colors hover:text-primary"
           >
             Fale conosco
           </Link>
         </nav>
         <Link
-          href="/contato"
+          href="https://parafa.com.br/contato"
           className="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground shadow-[var(--shadow-soft)] transition-transform hover:-translate-y-0.5"
         >
           Anuncie grátis

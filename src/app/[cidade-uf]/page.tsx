@@ -9,10 +9,14 @@ import { fetchCnpjCity } from "@/lib/api";
 
 type CityPageProps = { params: Promise<{ "cidade-uf": string }>; searchParams: Promise<{ after?: string }> };
 
-export async function generateMetadata({ params }: CityPageProps) {
+export async function generateMetadata({ params, searchParams }: CityPageProps) {
   const { "cidade-uf": slug } = await params;
   const response = await fetchCnpjCity(slug);
-  return { title: response ? `${response.city.name}/${response.city.state} | Parafa CNPJ` : "Cidade não encontrada | Parafa CNPJ" };
+  if (!response) notFound();
+  const { after } = await searchParams;
+  const cursor = Number(after);
+  const canonical = `/${slug}${Number.isSafeInteger(cursor) && cursor > 0 ? `?after=${cursor}` : ""}`;
+  return { title: `Empresas em ${response.city.name}/${response.city.state}${cursor > 0 ? " — mais empresas" : ""} | Parafa CNPJ`, description: `Consulte CNPJ e atividades de empresas em ${response.city.name}, ${response.city.state}.`, alternates: { canonical } };
 }
 
 export default async function CityPage({ params, searchParams }: CityPageProps) {

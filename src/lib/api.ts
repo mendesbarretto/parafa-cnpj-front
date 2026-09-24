@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 export type CnpjCompany = {
   id: number;
   url?: string;
@@ -18,6 +20,7 @@ export type CnpjCompany = {
   phone?: string | null;
   email?: string | null;
   legal_nature?: { cod?: string; name?: string } | string | null;
+  secondary_activities?: { activities?: { code?: string; name?: string } | null }[];
   activity?: { code?: string; name?: string } | null;
 };
 
@@ -50,16 +53,11 @@ type PaginatedResponse<T> = {
 
 const apiUrl = process.env.API_URL ?? "http://localhost:8000/api";
 
-async function getJson<T>(path: string, noStore = false): Promise<T | null> {
-  try {
-    const response = await fetch(`${apiUrl}${path}`, noStore
-      ? { cache: "no-store" }
-      : { next: { revalidate: 300 } });
-    if (!response.ok) return null;
-    return response.json() as Promise<T>;
-  } catch {
-    return null;
-  }
+async function getJson<T>(path: string): Promise<T | null> {
+  const response = await fetch(`${apiUrl}${path}`, { cache: "no-store", signal: AbortSignal.timeout(10000) });
+  if (response.status === 404 || response.status === 410) return null;
+  if (!response.ok) throw new Error(`CNPJ API unavailable (${response.status})`);
+  return response.json() as Promise<T>;
 }
 
 export async function fetchCnpjCompanies(params: Record<string, string | number> = {}) {
@@ -80,6 +78,13 @@ export async function fetchCnpjCity(citySlug: string, after?: number) {
   return getJson<{ city: CnpjCity; data: CnpjCompany[]; meta: { next_after?: number; has_more_pages: boolean } }>(`/cnpj/cities/${encodeURIComponent(citySlug)}${query}`);
 }
 
-export async function fetchCnpjCompany(cnpj: string) {
+export const fetchCnpjCompany = cache(async (cnpj: string) => {
   return getJson<{ data: CnpjCompany; related?: CnpjCompany[] }>(`/cnpj/companies/${encodeURIComponent(cnpj)}`);
+});
+
+export async function fetchSitemapIndex() {
+  return getJson<{ pages: number }>("/cnpj/sitemaps");
+}
+export async function fetchSitemapCompanies(page: number) {
+  return getJson<{ data: CnpjCompany[] }>(`/cnpj/sitemaps/${page}`);
 }
