@@ -30,7 +30,7 @@ export function CnpjRequestForm({ cnpj }: { cnpj: string }) {
 
   return <section id="solicitar-remocao" className="mt-10 scroll-mt-24 rounded-2xl border bg-card p-6">
     <h2 className="text-xl font-bold">Solicitar remoção ou correção</h2>
-    <p className="mt-3 text-sm text-muted-foreground">Este pedido se refere ao CNPJ {cnpj}. Confirme seu e-mail para encaminhá-lo à análise. Podemos pedir informações adicionais para verificar seu vínculo com os dados.</p>
+    <p className="mt-3 text-sm text-muted-foreground">Este pedido se refere ao CNPJ {cnpj}. Após confirmar seu e-mail, pedidos de remoção são executados automaticamente depois de uma hora. Pedidos de alteração são encaminhados à equipe do Parafa.</p>
     {!sent && <form onSubmit={submit} className="mt-5 grid gap-4 sm:grid-cols-2">
       <label>Nome<input required minLength={2} maxLength={150} autoComplete="name" name="name" className={field} /></label>
       <label>E-mail<input required type="email" maxLength={254} autoComplete="email" name="email" className={field} /></label>

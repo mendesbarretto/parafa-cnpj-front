@@ -4,9 +4,10 @@ import { useSyncExternalStore, useState } from "react";
 import Link from "next/link";
 
 const labels: Record<string, string> = {
-  pending_email: "Confirme abaixo para encaminhar seu pedido à análise.",
-  pending_review: "E-mail confirmado. Sua solicitação está em análise.",
-  removed: "Solicitação aprovada. O cadastro foi ocultado do Parafa CNPJ. Os buscadores podem levar algum tempo para atualizar seus resultados.",
+  pending_email: "Confirme abaixo para prosseguir. Remoções são executadas após uma hora; alterações são encaminhadas à equipe.",
+  scheduled_removal: "E-mail confirmado. A remoção do CNPJ do site está agendada para após uma hora desta confirmação.",
+  pending_review: "E-mail confirmado. Sua solicitação de alteração será encaminhada à equipe para análise.",
+  removed: "Remoção concluída. O cadastro foi ocultado do Parafa CNPJ. Os buscadores podem levar algum tempo para atualizar seus resultados.",
   rejected: "A solicitação não foi aprovada. Entre em contato com o Parafa informando seu protocolo para mais informações.",
   resolved: "A análise da solicitação de correção foi concluída. Entre em contato com seu protocolo se precisar de mais informações.",
 };
@@ -45,7 +46,7 @@ export function RequestConfirmation() {
 
   return <div className="mt-6 space-y-5">
     {!credentials ? <p>Para solicitar a remoção ou correção, <Link href="/busca" className="underline">localize o CNPJ</Link> e use o formulário na página da empresa. Se já recebeu um e-mail, abra o link completo para confirmar e acompanhar o pedido. Links antigos devem ser substituídos por uma nova solicitação.</p>
-      : <><p className="break-words text-sm">Protocolo: {credentials.id}</p><p>{labels[status] || "Confirme seu e-mail para enviar o pedido à análise ou consulte o andamento."}</p>
+      : <><p className="break-words text-sm">Protocolo: {credentials.id}</p><p>{labels[status] || "Confirme seu e-mail para prosseguir ou consulte o andamento. Pedidos de remoção serão executados após uma hora da confirmação."}</p>
         <div className="flex flex-wrap gap-3">
           {(!status || status === "pending_email") && <button disabled={busy} onClick={() => act("confirm")} className="rounded-lg bg-primary px-5 py-3 text-primary-foreground disabled:opacity-60">Confirmar solicitação</button>}
           <button disabled={busy} onClick={() => act("status")} className="rounded-lg border px-5 py-3 disabled:opacity-60">Consultar andamento</button>

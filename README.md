@@ -25,17 +25,17 @@ O build baixa a fonte do Google; precisa de rede na primeira execução.
 ## Ordem para publicar esta migração
 
 1. No backend, executar a migration `2026_09_23_204634_create_cnpj_privacy_tables.php` na conexão `pgsql2`, que precisa de permissão para criar as duas tabelas. Ela não altera nem apaga a tabela de empresas.
-2. Configurar SMTP e `CNPJ_SITE_URL=https://cnpj.parafa.com.br` no backend. Mailers `log` e `array` não são aceitos para solicitações em produção.
+2. Executar também a migration `2026_09_24_144445_add_correction_notified_at_to_cnpj_requests_table.php`. Configurar SMTP e `CNPJ_SITE_URL=https://cnpj.parafa.com.br` no backend. Mailers `log` e `array` não são aceitos para solicitações em produção.
 3. Publicar a API com os endpoints de solicitações, atividades secundárias e sitemaps. A base CNPJ deve conter a tabela `secondary_activities` do monolito.
-4. Publicar este frontend. Invalidar qualquer cache anterior no proxy/CDN e respeitar `private, no-store` nas respostas de dados CNPJ; não aplicar uma regra global de cache de HTML/XML.
-5. Conferir contato, ficha, formulário com uma caixa de teste, confirmação e acompanhamento. Não executar uma aprovação de remoção sobre um cadastro real apenas para testar.
+4. Manter o serviço `scheduler` do Compose do backend ativo; ele executa remoções e notificações a cada minuto. Publicar este frontend. Invalidar qualquer cache anterior no proxy/CDN e respeitar `private, no-store` nas respostas de dados CNPJ; não aplicar uma regra global de cache de HTML/XML.
+5. Conferir contato, ficha, formulário com uma caixa de teste, confirmação e acompanhamento. Não confirmar uma remoção sobre um cadastro real apenas para testar.
 6. Enviar `/sitemap.xml` ao Search Console e conferir `ads.txt` no AdSense. O novo índice substitui os fragmentos de sitemap gerados pelo Elasticsearch do monolito; eles não são mapeados por número, pois os identificadores não têm equivalência garantida.
 
 ## Privacidade e cache
 
-As solicitações são analisadas por um operador no backend. Confirmar o e-mail não exclui dados. O link usa fragmento, sem token na query string, e a página de acompanhamento não carrega Analytics ou AdSense. A navegação para ela usa uma carga completa de página para isolar scripts previamente carregados.
+Remoções são automáticas após uma hora da confirmação do e-mail, na próxima execução do scheduler. Alterações confirmadas são enviadas para o endereço definido em `CNPJ_CORRECTION_EMAIL`, por padrão `mendesbarretto@gmail.com`, e aguardam atendimento. O link usa fragmento, sem token na query string, e a página de acompanhamento não carrega Analytics ou AdSense. A navegação para ela usa uma carga completa de página para isolar scripts previamente carregados.
 
-Os dados públicos continuam em cache no Laravel. O Next e caches HTTP não guardam essas respostas: assim, a revisão durável do backend invalida ficha, busca, relacionados e sitemap após a aprovação. A ocultação usa uma tabela separada do cadastro importado e sobrevive à atualização de uma empresa.
+Os dados públicos continuam em cache no Laravel. O Next e caches HTTP não guardam essas respostas: assim, a revisão durável do backend invalida ficha, busca, relacionados e sitemap após a remoção. A ocultação usa uma tabela separada do cadastro importado e sobrevive à atualização de uma empresa.
 
 ## Medição e experimentos
 
